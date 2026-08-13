@@ -224,37 +224,56 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       maskCtx.clearRect(0, 0, width, height);
 
       // --- MASK CANVAS RENDERING ---
-      // Build a smooth vertical mist vapor mask to reveal the perfume image (No circles or arcs)
-      if (imgRef.current && imageLoaded) {
+      // Center-out expansion and pop-out reveal from the heart of the smoke cloud
+      if (imgRef.current && imageLoaded && pVal > 0) {
         maskCtx.save();
         
-        // Linear vertical mist expansion (rising vapor dissolve without any circular shapes)
-        const maskTop = height * (1 - pVal * 1.25);
-        const grad = maskCtx.createLinearGradient(0, maskTop, 0, height);
-        grad.addColorStop(0, "rgba(255, 255, 255, 0)");
-        grad.addColorStop(Math.min(0.4, pVal), `rgba(255, 255, 255, ${Math.min(1, pVal * 1.5)})`);
-        grad.addColorStop(1, "rgba(255, 255, 255, 1)");
+        const centerX = width / 2;
+        const centerY = height * 0.5;
+
+        // Organic center-out expanding radial mask
+        const maxMaskRadius = Math.max(width, height) * 0.75;
+        const currentRadius = maxMaskRadius * pVal;
+
+        const grad = maskCtx.createRadialGradient(
+          centerX,
+          centerY,
+          0,
+          centerX,
+          centerY,
+          currentRadius
+        );
+        grad.addColorStop(0, "rgba(255, 255, 255, 1)");
+        grad.addColorStop(Math.min(0.7, pVal), `rgba(255, 255, 255, ${Math.min(1, pVal * 1.3)})`);
+        grad.addColorStop(1, "rgba(255, 255, 255, 0)");
 
         maskCtx.fillStyle = grad;
-        maskCtx.fillRect(0, 0, width, height);
+        maskCtx.beginPath();
+        maskCtx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+        maskCtx.fill();
 
         // Composite product image into mask via destination-in
         maskCtx.globalCompositeOperation = "source-in";
 
-        // Fit & draw perfume image centered inside mask canvas
+        // Fit & draw perfume image centered with dynamic center-out pop scaling (0.80 -> 1.0)
         const img = imgRef.current;
         const imgAspect = img.width / img.height;
 
-        let drawW = width * 0.85;
-        let drawH = drawW / imgAspect;
+        let baseW = width * 0.85;
+        let baseH = baseW / imgAspect;
 
-        if (drawH > height * 0.85) {
-          drawH = height * 0.85;
-          drawW = drawH * imgAspect;
+        if (baseH > height * 0.85) {
+          baseH = height * 0.85;
+          baseW = baseH * imgAspect;
         }
 
-        const drawX = (width - drawW) / 2;
-        const drawY = (height - drawH) / 2;
+        // Center-out pop expansion scaling
+        const popScale = 0.80 + pVal * 0.20;
+        const drawW = baseW * popScale;
+        const drawH = baseH * popScale;
+
+        const drawX = centerX - drawW / 2;
+        const drawY = centerY - drawH / 2;
 
         maskCtx.drawImage(img, drawX, drawY, drawW, drawH);
         maskCtx.restore();
