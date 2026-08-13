@@ -64,19 +64,35 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
   const revealProgressRef = useRef(0);
   const isRevealingRef = useRef(false);
 
-  // Preload Product Image
+  // Preload Product Image with resilient crossOrigin and fallback logic
   useEffect(() => {
     setImageLoaded(false);
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (imageSrc.startsWith("http")) {
+      img.crossOrigin = "anonymous";
+    }
     img.src = imageSrc;
     img.onload = () => {
       imgRef.current = img;
       setImageLoaded(true);
     };
     img.onerror = () => {
-      // Fallback
-      setImageLoaded(true);
+      // Retry without crossOrigin if crossOrigin failed
+      const fallbackImg = new Image();
+      fallbackImg.src = imageSrc;
+      fallbackImg.onload = () => {
+        imgRef.current = fallbackImg;
+        setImageLoaded(true);
+      };
+      fallbackImg.onerror = () => {
+        // Fallback to primary hero_perfume.png if image path is missing
+        const defaultImg = new Image();
+        defaultImg.src = "/hero_perfume.png";
+        defaultImg.onload = () => {
+          imgRef.current = defaultImg;
+          setImageLoaded(true);
+        };
+      };
     };
   }, [imageSrc]);
 

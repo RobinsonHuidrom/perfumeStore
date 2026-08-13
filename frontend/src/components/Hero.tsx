@@ -40,7 +40,7 @@ const HERO_FEATURED_PERFUMES: FeaturedPerfume[] = [
     subtitle: "Royal Collection",
     price: "₹155 INR",
     notes: "Top: Crimson Clove • Heart: Taif Rose • Base: Dark Agarwood",
-    image: "http://localhost:9000/static/perfume_2.png",
+    image: "/perfume_2.png",
     edition: "LIMITED HARVEST",
     badge: "Grasse Rose Absolute",
     smokeTheme: {
@@ -56,7 +56,7 @@ const HERO_FEATURED_PERFUMES: FeaturedPerfume[] = [
     subtitle: "Luminous Edition",
     price: "₹120 INR",
     notes: "Top: Calabrian Bergamot • Heart: Neroli Petals • Base: White Amber",
-    image: "http://localhost:9000/static/perfume_3.png",
+    image: "/perfume_3.png",
     edition: "SUMMER SOLSTICE",
     badge: "Sun-Drenched Citrus",
     smokeTheme: {
