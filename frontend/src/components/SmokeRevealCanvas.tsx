@@ -201,9 +201,9 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       const width = rect.width;
       const height = rect.height;
 
-      // 1. Advance Mask Reveal progress (0 to 1 over ~1.2s)
+      // 1. Advance Mask Reveal progress over ~2.6 seconds (delta * 0.38)
       if (isRevealingRef.current) {
-        revealProgressRef.current += delta * 0.9;
+        revealProgressRef.current += delta * 0.38;
         if (revealProgressRef.current >= 1) {
           revealProgressRef.current = 1;
           isRevealingRef.current = false;
@@ -211,7 +211,15 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
         setRevealProgress(revealProgressRef.current);
       }
 
-      const pVal = revealProgressRef.current;
+      const rawVal = revealProgressRef.current;
+
+      // Delay product reveal so smoke/gas cloud swells FIRST (rawVal < 0.22 -> product hidden)
+      let pVal = 0;
+      if (rawVal > 0.22) {
+        const normalized = (rawVal - 0.22) / 0.78;
+        // Cubic ease-out for a slow, silky unmasking of the product out of the gas cloud
+        pVal = 1 - Math.pow(1 - normalized, 2.5);
+      }
 
       // Clear Canvas
       bgCtx.clearRect(0, 0, width, height);

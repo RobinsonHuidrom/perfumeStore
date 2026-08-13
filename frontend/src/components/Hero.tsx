@@ -72,7 +72,7 @@ export const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealTriggerKey, setRevealTriggerKey] = useState(0);
 
-  // Relaxed 4.5-second pace for luxury presentation with fluid smoke reveal
+  // Relaxed 6.5-second pace allowing smoke to billow first before slow product reveal
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => {
@@ -80,7 +80,7 @@ export const Hero = () => {
         setRevealTriggerKey(Date.now());
         return next;
       });
-    }, 4500);
+    }, 6500);
 
     return () => clearInterval(timer);
   }, []);
