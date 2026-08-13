@@ -72,7 +72,7 @@ export const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealTriggerKey, setRevealTriggerKey] = useState(0);
 
-  // Relaxed 6.5-second pace allowing smoke to billow first before slow product reveal
+  // 9.5-second auto-slide interval providing 2.5s initial smoke, 3.3s slow product reveal, and 3.7s resting view
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => {
@@ -80,7 +80,7 @@ export const Hero = () => {
         setRevealTriggerKey(Date.now());
         return next;
       });
-    }, 6500);
+    }, 9500);
 
     return () => clearInterval(timer);
   }, []);

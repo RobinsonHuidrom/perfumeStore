@@ -61,7 +61,7 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
   // Animation frame ref
   const animFrameRef = useRef<number | null>(null);
   const particlesRef = useRef<SmokeParticle[]>([]);
-  const revealProgressRef = useRef(0);
+  const revealTimerRef = useRef(0);
   const isRevealingRef = useRef(false);
 
   // Preload Product Image with resilient crossOrigin and fallback logic
@@ -98,7 +98,7 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
 
   // Trigger Burst & Reset Mask Reveal whenever triggerKey changes
   const triggerReveal = useCallback(() => {
-    revealProgressRef.current = 0;
+    revealTimerRef.current = 0;
     setRevealProgress(0);
     isRevealingRef.current = true;
 
@@ -114,21 +114,21 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
     const newParticles: SmokeParticle[] = [];
 
     // Dense smoke cloud particles
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 60; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 2.5 + 0.8;
-      const maxLife = 90 + Math.random() * 60;
+      const speed = Math.random() * 2.8 + 1.0;
+      const maxLife = 120 + Math.random() * 80;
       newParticles.push({
-        x: centerX + Math.cos(angle) * (Math.random() * 40),
-        y: centerY + Math.sin(angle) * (Math.random() * 40),
-        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 0.8,
-        vy: Math.sin(angle) * speed - (Math.random() * 1.5 + 0.5),
-        size: Math.random() * 35 + 25,
-        maxSize: Math.random() * 90 + 70,
+        x: centerX + Math.cos(angle) * (Math.random() * 50),
+        y: centerY + Math.sin(angle) * (Math.random() * 50),
+        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 1.0,
+        vy: Math.sin(angle) * speed - (Math.random() * 2.0 + 0.8),
+        size: Math.random() * 40 + 30,
+        maxSize: Math.random() * 110 + 80,
         alpha: 0,
-        maxAlpha: Math.random() * 0.45 + 0.35,
+        maxAlpha: Math.random() * 0.55 + 0.40,
         rotation: Math.random() * Math.PI * 2,
-        vRot: (Math.random() - 0.5) * 0.02,
+        vRot: (Math.random() - 0.5) * 0.03,
         life: 0,
         maxLife,
         colorType: i % 3 === 0 ? "primary" : i % 3 === 1 ? "secondary" : "core",
@@ -136,22 +136,22 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
     }
 
     // Glowing ember / golden perfume mist sparkles
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 35; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const dist = Math.random() * 80;
+      const dist = Math.random() * 90;
       newParticles.push({
         x: centerX + Math.cos(angle) * dist,
         y: centerY + Math.sin(angle) * dist,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: -Math.random() * 2.2 - 0.5,
-        size: Math.random() * 3 + 1.5,
-        maxSize: Math.random() * 6 + 3,
+        vx: (Math.random() - 0.5) * 1.8,
+        vy: -Math.random() * 2.5 - 0.8,
+        size: Math.random() * 3.5 + 1.5,
+        maxSize: Math.random() * 7 + 3.5,
         alpha: 0,
-        maxAlpha: Math.random() * 0.8 + 0.2,
+        maxAlpha: Math.random() * 0.85 + 0.25,
         rotation: 0,
         vRot: 0,
         life: 0,
-        maxLife: 70 + Math.random() * 50,
+        maxLife: 80 + Math.random() * 60,
         colorType: "sparkle",
       });
     }
@@ -201,24 +201,25 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       const width = rect.width;
       const height = rect.height;
 
-      // 1. Advance Mask Reveal progress over ~2.6 seconds (delta * 0.38)
+      // 1. Advance timer in exact seconds
       if (isRevealingRef.current) {
-        revealProgressRef.current += delta * 0.38;
-        if (revealProgressRef.current >= 1) {
-          revealProgressRef.current = 1;
+        revealTimerRef.current += delta;
+        if (revealTimerRef.current >= 5.8) {
+          revealTimerRef.current = 5.8;
           isRevealingRef.current = false;
         }
-        setRevealProgress(revealProgressRef.current);
+        setRevealProgress(revealTimerRef.current / 5.8);
       }
 
-      const rawVal = revealProgressRef.current;
+      const elapsed = revealTimerRef.current;
 
-      // Delay product reveal so smoke/gas cloud swells FIRST (rawVal < 0.22 -> product hidden)
+      // Phase 1 (0.0s to 2.5s): Smoke Swirls First (product 100% hidden, pVal = 0)
+      // Phase 2 (2.5s to 5.8s): Slow Product Unmasking over 3.3 seconds (pVal 0 -> 1)
       let pVal = 0;
-      if (rawVal > 0.22) {
-        const normalized = (rawVal - 0.22) / 0.78;
-        // Cubic ease-out for a slow, silky unmasking of the product out of the gas cloud
-        pVal = 1 - Math.pow(1 - normalized, 2.5);
+      if (elapsed >= 2.5) {
+        const progress = Math.min(1, (elapsed - 2.5) / 3.3);
+        // Cubic ease-out curve for slow, silky product unmasking out of the gas cloud
+        pVal = 1 - Math.pow(1 - progress, 2.5);
       }
 
       // Clear Canvas
