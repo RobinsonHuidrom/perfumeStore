@@ -199,11 +199,11 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       const width = rect.width;
       const height = rect.height;
 
-      // 1. Advance timer in exact seconds
+      // 1. Advance timer in exact seconds across the 9.5s slide lifecycle
       if (isRevealingRef.current) {
         revealTimerRef.current += delta;
-        if (revealTimerRef.current >= 5.1) {
-          revealTimerRef.current = 5.1;
+        if (revealTimerRef.current >= 9.5) {
+          revealTimerRef.current = 9.5;
           isRevealingRef.current = false;
         }
       }
@@ -211,12 +211,24 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       const elapsed = revealTimerRef.current;
 
       // Phase 1 (0.0s to 1.8s): Smoke Swirls First (product 100% hidden, pVal = 0)
-      // Phase 2 (1.8s to 5.1s): Slow Product Zoom-In & Unmasking over 3.3 seconds (pVal 0 -> 1)
+      // Phase 2 (1.8s to 5.1s): Center-Out Unmasking & Initial Zoom (pVal 0 -> 1, zoom 0.65 -> 1.00)
+      // Phase 3 (5.1s to 9.5s): Final Resting View Continuous Zoom-In (pVal = 1, zoom 1.00 -> 1.10)
       let pVal = 0;
-      if (elapsed >= 1.8) {
-        const progress = Math.min(1, (elapsed - 1.8) / 3.3);
-        // Cubic ease-out curve for slow, silky product unmasking & zooming in out of the gas cloud
+      let zoomScale = 0.65;
+
+      if (elapsed < 1.8) {
+        pVal = 0;
+        zoomScale = 0.65;
+      } else if (elapsed >= 1.8 && elapsed < 5.1) {
+        const progress = (elapsed - 1.8) / 3.3;
+        // Cubic ease-out curve for silky product unmasking out of the gas cloud
         pVal = 1 - Math.pow(1 - progress, 2.5);
+        zoomScale = 0.65 + (1 - Math.pow(1 - progress, 3)) * 0.35; // 0.65 -> 1.00
+      } else {
+        pVal = 1.0;
+        const restProgress = Math.min(1, (elapsed - 5.1) / 4.4);
+        // Continuous slow luxury zoom-in during final resting view right before next slide (1.00 -> 1.10)
+        zoomScale = 1.00 + (1 - Math.pow(1 - restProgress, 1.8)) * 0.10;
       }
 
       // Clear Canvas
@@ -255,7 +267,7 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
         // Composite product image into mask via destination-in
         maskCtx.globalCompositeOperation = "source-in";
 
-        // Fit & draw perfume image centered with dynamic center-out zooming-in effect (0.65 -> 1.0)
+        // Fit & draw perfume image centered with dynamic zooming-in scale (0.65 -> 1.00 -> 1.10)
         const img = imgRef.current;
         const imgAspect = img.width / img.height;
 
@@ -267,8 +279,6 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
           baseW = baseH * imgAspect;
         }
 
-        // Luxurious Zooming-In Scale (emerges from deep inside mist at 65% scale, zooming forward to 100%)
-        const zoomScale = 0.65 + (1 - Math.pow(1 - pVal, 3)) * 0.35;
         const drawW = baseW * zoomScale;
         const drawH = baseH * zoomScale;
 
