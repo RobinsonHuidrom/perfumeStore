@@ -255,7 +255,7 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
         // Composite product image into mask via destination-in
         maskCtx.globalCompositeOperation = "source-in";
 
-        // Fit & draw perfume image centered with dynamic center-out pop scaling (0.80 -> 1.0)
+        // Fit & draw perfume image centered with dynamic center-out zooming-in effect (0.65 -> 1.0)
         const img = imgRef.current;
         const imgAspect = img.width / img.height;
 
@@ -267,10 +267,10 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
           baseW = baseH * imgAspect;
         }
 
-        // Center-out pop expansion scaling
-        const popScale = 0.80 + pVal * 0.20;
-        const drawW = baseW * popScale;
-        const drawH = baseH * popScale;
+        // Luxurious Zooming-In Scale (emerges from deep inside mist at 65% scale, zooming forward to 100%)
+        const zoomScale = 0.65 + (1 - Math.pow(1 - pVal, 3)) * 0.35;
+        const drawW = baseW * zoomScale;
+        const drawH = baseH * zoomScale;
 
         const drawX = centerX - drawW / 2;
         const drawY = centerY - drawH / 2;
