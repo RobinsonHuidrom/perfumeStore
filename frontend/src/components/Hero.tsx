@@ -2,9 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, Award, ShieldCheck, Droplets } from "lucide-react";
+import { Sparkles, Award, ShieldCheck, Droplets, Flame, RotateCcw } from "lucide-react";
+import { SmokeRevealCanvas, PerfumeSmokeTheme } from "./SmokeRevealCanvas";
 
-const HERO_FEATURED_PERFUMES = [
+export interface FeaturedPerfume {
+  handle: string;
+  title: string;
+  subtitle: string;
+  price: string;
+  notes: string;
+  image: string;
+  edition: string;
+  badge: string;
+  smokeTheme: PerfumeSmokeTheme;
+}
+
+const HERO_FEATURED_PERFUMES: FeaturedPerfume[] = [
   {
     handle: "noir-elegance",
     title: "Noir Élégance",
@@ -14,6 +27,12 @@ const HERO_FEATURED_PERFUMES = [
     image: "/hero_perfume.png",
     edition: "EDITION 2026",
     badge: "99.8% Pure Botanicals",
+    smokeTheme: {
+      primaryGlow: "rgba(212, 175, 55,",   // Warm Amber Gold
+      secondaryGlow: "rgba(180, 130, 40,",  // Smoked Oud
+      smokeCore: "rgba(25, 20, 15,",       // Obsidian Smoke
+      particleAccent: "#D4AF37",
+    },
   },
   {
     handle: "velvet-rose-oud",
@@ -24,6 +43,12 @@ const HERO_FEATURED_PERFUMES = [
     image: "http://localhost:9000/static/perfume_2.png",
     edition: "LIMITED HARVEST",
     badge: "Grasse Rose Absolute",
+    smokeTheme: {
+      primaryGlow: "rgba(225, 112, 120,",  // Taif Crimson Rose
+      secondaryGlow: "rgba(190, 80, 100,", // Deep Velvet Rose
+      smokeCore: "rgba(35, 15, 25,",       // Dark Agarwood Vapor
+      particleAccent: "#E17078",
+    },
   },
   {
     handle: "celestial-bergamot",
@@ -34,29 +59,56 @@ const HERO_FEATURED_PERFUMES = [
     image: "http://localhost:9000/static/perfume_3.png",
     edition: "SUMMER SOLSTICE",
     badge: "Sun-Drenched Citrus",
+    smokeTheme: {
+      primaryGlow: "rgba(255, 220, 130,",  // Luminous Bergamot Gold
+      secondaryGlow: "rgba(230, 190, 90,", // Neroli Sunlit Glow
+      smokeCore: "rgba(30, 30, 25,",       // White Amber Vapor
+      particleAccent: "#FFDC82",
+    },
   },
 ];
 
 export const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [revealTriggerKey, setRevealTriggerKey] = useState(0);
 
-  // Adjusted to 3.5 seconds (3500ms) for a smooth, relaxed luxury pace
+  // Relaxed 4-second pace for luxury presentation with fluid smoke reveal
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % HERO_FEATURED_PERFUMES.length);
-    }, 3500);
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % HERO_FEATURED_PERFUMES.length;
+        setRevealTriggerKey(Date.now());
+        return next;
+      });
+    }, 4500);
 
     return () => clearInterval(timer);
   }, []);
 
+  const handleSelectPerfume = (idx: number) => {
+    setCurrentIndex(idx);
+    setRevealTriggerKey(Date.now());
+  };
+
+  const handleReplaySmoke = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setRevealTriggerKey(Date.now());
+  };
+
   const activePerfume = HERO_FEATURED_PERFUMES[currentIndex];
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-obsidian-900 pt-8 pb-16">
+    <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-obsidian-900 pt-8 pb-16">
       
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-gold-500/10 rounded-full blur-[150px] pointer-events-none"></div>
-      <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-amber-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+      {/* Dynamic background ambient lighting based on perfume theme */}
+      <div
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[750px] h-[750px] rounded-full blur-[160px] pointer-events-none transition-colors duration-1000 opacity-20"
+        style={{
+          background: `radial-gradient(circle, ${activePerfume.smokeTheme.primaryGlow}0.6) 0%, transparent 70%)`,
+        }}
+      />
+      <div className="absolute top-1/3 right-10 w-[420px] h-[420px] bg-amber-600/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -66,7 +118,7 @@ export const Hero = () => {
             
             {/* Sub-badge */}
             <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-gold-500/20 bg-obsidian-800/80 mb-6 backdrop-blur-md">
-              <Sparkles size={14} className="text-gold-400" />
+              <Sparkles size={14} className="text-gold-400 animate-spin-slow" />
               <span className="text-xs uppercase tracking-[0.25em] text-gold-400 font-medium">
                 Haute Parfumerie • Paris & Grasse
               </span>
@@ -115,14 +167,14 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column: 3.5-Second Cycling Perfume Showcase (5 cols) */}
+          {/* Right Column: Dynamic Smoke/Gas Reveal Product Showcase (5 cols) */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             
             {/* Glowing Orbit Backdrop Ring */}
-            <div className="absolute w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full border border-gold-500/20 animate-pulse-glow pointer-events-none"></div>
-            <div className="absolute w-[280px] h-[280px] sm:w-[360px] sm:h-[360px] rounded-full border border-gold-500/10 pointer-events-none"></div>
+            <div className="absolute w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] rounded-full border border-gold-500/20 animate-pulse-glow pointer-events-none"></div>
+            <div className="absolute w-[290px] h-[290px] sm:w-[380px] sm:h-[380px] rounded-full border border-gold-500/10 pointer-events-none"></div>
 
-            {/* Main Floating Showcase Card with Smooth Fade Transition */}
+            {/* Main Showcase Container with Interactive Smoke Canvas */}
             <div className="relative z-10 w-full max-w-md animate-float">
               
               <Link
@@ -130,34 +182,46 @@ export const Hero = () => {
                 className="block glass-panel rounded-3xl p-6 sm:p-8 border border-gold-500/30 gold-border-glow shadow-2xl relative overflow-hidden group transition-all duration-700"
               >
                 {/* Gold Ray Light Accent */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-gold-500/15 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-44 h-44 bg-gold-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                {/* Top Badge Overlay */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest font-mono text-gold-400 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/20">
+                {/* Top Badge Overlay & Replay Vapor Button */}
+                <div className="flex items-center justify-between mb-2 z-20 relative">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-mono text-gold-400 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/20">
                     <Award size={12} />
                     <span>{activePerfume.subtitle}</span>
                   </span>
-                  <span className="text-[10px] font-mono text-gold-500/80 tracking-widest">
-                    {activePerfume.edition}
-                  </span>
+                  
+                  {/* Replay Smoke Vapor Burst button */}
+                  <button
+                    onClick={handleReplaySmoke}
+                    title="Replay Smoke Reveal Burst"
+                    className="flex items-center gap-1 text-[10px] font-mono text-gold-400 hover:text-white bg-obsidian-800/80 hover:bg-gold-500/20 px-2.5 py-1 rounded-full border border-gold-500/30 backdrop-blur-md transition-all duration-300 group/btn"
+                  >
+                    <Flame size={12} className="text-gold-400 group-hover/btn:animate-bounce" />
+                    <span className="hidden sm:inline">Vapor Burst</span>
+                    <RotateCcw size={10} className="ml-0.5 opacity-70 group-hover/btn:rotate-180 transition-transform duration-500" />
+                  </button>
                 </div>
 
-                {/* Perfume Bottle Image (Smooth 700ms fade & scale transition) */}
+                {/* SMOKE / GAS REVEAL CANVAS CONTAINER */}
                 <div className="relative aspect-[4/5] w-full flex items-center justify-center p-2 mb-4">
-                  <img
+                  <SmokeRevealCanvas
                     key={activePerfume.handle}
-                    src={activePerfume.image}
-                    alt={activePerfume.title}
-                    className="w-full h-full object-contain drop-shadow-[0_20px_35px_rgba(212,175,55,0.25)] transition-all duration-700 ease-in-out scale-100 group-hover:scale-105"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/hero_perfume.png";
-                    }}
+                    imageSrc={activePerfume.image}
+                    altText={activePerfume.title}
+                    triggerKey={revealTriggerKey}
+                    theme={activePerfume.smokeTheme}
+                    className="w-full h-full"
                   />
+
+                  {/* Interactive Vapor Hint */}
+                  <div className="absolute bottom-2 right-2 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity text-[9px] font-mono uppercase tracking-widest text-gold-400/80 bg-obsidian-900/80 px-2 py-0.5 rounded border border-gold-500/20">
+                    Move cursor to swirl vapor
+                  </div>
                 </div>
 
                 {/* Scent Profile Overlay Badge */}
-                <div className="p-4 rounded-2xl bg-obsidian-900/90 border border-gold-500/20 backdrop-blur-md space-y-2">
+                <div className="p-4 rounded-2xl bg-obsidian-900/90 border border-gold-500/20 backdrop-blur-md space-y-2 relative z-20">
                   <div className="flex items-center justify-between text-xs font-serif text-white">
                     <span className="font-bold tracking-wide text-base group-hover:text-gold-400 transition-colors">
                       {activePerfume.title}
@@ -171,7 +235,7 @@ export const Hero = () => {
               </Link>
 
               {/* Floating Badge 1: Botanical Extract */}
-              <div className="absolute -bottom-4 -left-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex">
+              <div className="absolute -bottom-4 -left-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex z-30">
                 <Droplets size={16} className="text-gold-400" />
                 <div>
                   <span className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono">Extraction</span>
@@ -179,32 +243,32 @@ export const Hero = () => {
                 </div>
               </div>
 
-              {/* Floating Badge 2: Paris Seal */}
-              <div className="absolute -top-4 -right-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex">
+              {/* Floating Badge 2: Smoke Reveal Tech */}
+              <div className="absolute -top-4 -right-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex z-30">
                 <ShieldCheck size={16} className="text-gold-400" />
                 <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono">Origin</span>
-                  <span className="font-serif text-white font-medium">Paris Atelier Seal</span>
+                  <span className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono">Vapor Masking</span>
+                  <span className="font-serif text-white font-medium">Gas Reveal Engine</span>
                 </div>
               </div>
             </div>
 
-            {/* Carousel Control Dots & Indicators */}
+            {/* Carousel Control Dots & Scent Indicators */}
             <div className="mt-8 flex items-center space-x-3 z-20">
               {HERO_FEATURED_PERFUMES.map((perfume, idx) => (
                 <button
                   key={perfume.handle}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`group flex items-center space-x-2 px-3 py-1.5 rounded-full border transition-all duration-500 ${
+                  onClick={() => handleSelectPerfume(idx)}
+                  className={`group flex items-center space-x-2 px-3.5 py-1.5 rounded-full border transition-all duration-500 ${
                     currentIndex === idx
-                      ? "bg-gold-500/20 border-gold-500 text-gold-400 shadow-md"
-                      : "bg-obsidian-800/60 border-gold-500/10 text-gray-500 hover:text-gray-300"
+                      ? "bg-gold-500/20 border-gold-500 text-gold-400 shadow-md scale-105"
+                      : "bg-obsidian-800/60 border-gold-500/10 text-gray-500 hover:text-gray-300 hover:border-gold-500/30"
                   }`}
                 >
                   <span className="text-[10px] font-mono font-bold">0{idx + 1}</span>
                   <span className="text-xs font-serif hidden sm:inline">{perfume.title}</span>
                   {currentIndex === idx && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-ping" />
                   )}
                 </button>
               ))}
@@ -216,3 +280,4 @@ export const Hero = () => {
     </section>
   );
 };
+
