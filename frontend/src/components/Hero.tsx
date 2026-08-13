@@ -170,16 +170,16 @@ export const Hero = () => {
           {/* Right Column: Dynamic Smoke/Gas Reveal Product Showcase (5 cols) */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             
-            {/* Glowing Orbit Backdrop Ring */}
-            <div className="absolute w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] rounded-full border border-gold-500/20 animate-pulse-glow pointer-events-none"></div>
+            {/* Glowing Orbit Backdrop Ring (Static glow) */}
+            <div className="absolute w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] rounded-full border border-gold-500/20 pointer-events-none"></div>
             <div className="absolute w-[290px] h-[290px] sm:w-[380px] sm:h-[380px] rounded-full border border-gold-500/10 pointer-events-none"></div>
 
-            {/* Main Showcase Container with Interactive Smoke Canvas */}
-            <div className="relative z-10 w-full max-w-md animate-float">
+            {/* Main Showcase Container (Fixed position, focused on smoke reveal) */}
+            <div className="relative z-10 w-full max-w-md">
               
               <Link
                 href={`/products/${activePerfume.handle}`}
-                className="block glass-panel rounded-3xl p-6 sm:p-8 border border-gold-500/30 gold-border-glow shadow-2xl relative overflow-hidden group transition-all duration-700"
+                className="block glass-panel rounded-3xl p-6 sm:p-8 border border-gold-500/30 gold-border-glow shadow-2xl relative overflow-hidden group"
               >
                 {/* Gold Ray Light Accent */}
                 <div className="absolute top-0 right-0 w-44 h-44 bg-gold-500/15 rounded-full blur-3xl pointer-events-none"></div>
@@ -261,7 +261,7 @@ export const Hero = () => {
                   onClick={() => handleSelectPerfume(idx)}
                   className={`group flex items-center space-x-2 px-3.5 py-1.5 rounded-full border transition-all duration-500 ${
                     currentIndex === idx
-                      ? "bg-gold-500/20 border-gold-500 text-gold-400 shadow-md scale-105"
+                      ? "bg-gold-500/20 border-gold-500 text-gold-400 shadow-md"
                       : "bg-obsidian-800/60 border-gold-500/10 text-gray-500 hover:text-gray-300 hover:border-gold-500/30"
                   }`}
                 >

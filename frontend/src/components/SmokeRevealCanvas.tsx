@@ -414,10 +414,10 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
       />
 
-      {/* Mask Revealed Product Image Canvas */}
+      {/* Mask Revealed Product Image Canvas (Fixed position) */}
       <canvas
         ref={maskCanvasRef}
-        className="relative z-10 w-full h-full pointer-events-none drop-shadow-[0_20px_35px_rgba(212,175,55,0.3)] transition-transform duration-500 hover:scale-[1.03]"
+        className="relative z-10 w-full h-full pointer-events-none drop-shadow-[0_20px_35px_rgba(212,175,55,0.3)]"
       />
 
       {/* Fallback image when canvas is initializing */}
