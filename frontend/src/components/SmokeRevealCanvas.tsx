@@ -202,20 +202,20 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       // 1. Advance timer in exact seconds
       if (isRevealingRef.current) {
         revealTimerRef.current += delta;
-        if (revealTimerRef.current >= 5.8) {
-          revealTimerRef.current = 5.8;
+        if (revealTimerRef.current >= 5.1) {
+          revealTimerRef.current = 5.1;
           isRevealingRef.current = false;
         }
       }
 
       const elapsed = revealTimerRef.current;
 
-      // Phase 1 (0.0s to 2.5s): Smoke Swirls First (product 100% hidden, pVal = 0)
-      // Phase 2 (2.5s to 5.8s): Slow Product Unmasking over 3.3 seconds (pVal 0 -> 1)
+      // Phase 1 (0.0s to 1.8s): Smoke Swirls First (product 100% hidden, pVal = 0)
+      // Phase 2 (1.8s to 5.1s): Slow Product Zoom-In & Unmasking over 3.3 seconds (pVal 0 -> 1)
       let pVal = 0;
-      if (elapsed >= 2.5) {
-        const progress = Math.min(1, (elapsed - 2.5) / 3.3);
-        // Cubic ease-out curve for slow, silky product unmasking out of the gas cloud
+      if (elapsed >= 1.8) {
+        const progress = Math.min(1, (elapsed - 1.8) / 3.3);
+        // Cubic ease-out curve for slow, silky product unmasking & zooming in out of the gas cloud
         pVal = 1 - Math.pow(1 - progress, 2.5);
       }
 
