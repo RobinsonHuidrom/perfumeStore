@@ -51,7 +51,6 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [revealProgress, setRevealProgress] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
@@ -99,7 +98,6 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
   // Trigger Burst & Reset Mask Reveal whenever triggerKey changes
   const triggerReveal = useCallback(() => {
     revealTimerRef.current = 0;
-    setRevealProgress(0);
     isRevealingRef.current = true;
 
     // Generate heavy smoke burst around center & bottom
@@ -208,7 +206,6 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
           revealTimerRef.current = 5.8;
           isRevealingRef.current = false;
         }
-        setRevealProgress(revealTimerRef.current / 5.8);
       }
 
       const elapsed = revealTimerRef.current;
@@ -227,56 +224,19 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
       maskCtx.clearRect(0, 0, width, height);
 
       // --- MASK CANVAS RENDERING ---
-      // We build an expanding, organic fluid/smoke mask to reveal the perfume image
+      // Build a smooth vertical mist vapor mask to reveal the perfume image (No circles or arcs)
       if (imgRef.current && imageLoaded) {
-        const maskRadius = Math.max(width, height) * (0.05 + pVal * 1.1);
-        const centerX = width / 2;
-        const centerY = height * 0.5;
-
-        // Base organic circular expansion mask
         maskCtx.save();
         
-        // Draw fluid radial gradient expansion
-        const grad = maskCtx.createRadialGradient(
-          centerX,
-          centerY,
-          0,
-          centerX,
-          centerY,
-          maskRadius
-        );
-        grad.addColorStop(0, "rgba(255, 255, 255, 1)");
-        grad.addColorStop(Math.min(0.7, pVal), "rgba(255, 255, 255, 0.95)");
-        grad.addColorStop(0.9, `rgba(255, 255, 255, ${Math.min(1, pVal * 1.5)})`);
-        grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+        // Linear vertical mist expansion (rising vapor dissolve without any circular shapes)
+        const maskTop = height * (1 - pVal * 1.25);
+        const grad = maskCtx.createLinearGradient(0, maskTop, 0, height);
+        grad.addColorStop(0, "rgba(255, 255, 255, 0)");
+        grad.addColorStop(Math.min(0.4, pVal), `rgba(255, 255, 255, ${Math.min(1, pVal * 1.5)})`);
+        grad.addColorStop(1, "rgba(255, 255, 255, 1)");
 
         maskCtx.fillStyle = grad;
-        maskCtx.beginPath();
-        maskCtx.arc(centerX, centerY, maskRadius, 0, Math.PI * 2);
-        maskCtx.fill();
-
-        // Add extra swirling mask blobs during reveal for vapor texture edge
-        if (pVal < 1.0) {
-          particlesRef.current.forEach((pt) => {
-            if (pt.colorType !== "sparkle") {
-              const maskBlobGrad = maskCtx.createRadialGradient(
-                pt.x,
-                pt.y,
-                0,
-                pt.x,
-                pt.y,
-                pt.size * 1.2
-              );
-              maskBlobGrad.addColorStop(0, `rgba(255, 255, 255, ${pt.alpha * 0.8})`);
-              maskBlobGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-              maskCtx.fillStyle = maskBlobGrad;
-              maskCtx.beginPath();
-              maskCtx.arc(pt.x, pt.y, pt.size * 1.2, 0, Math.PI * 2);
-              maskCtx.fill();
-            }
-          });
-        }
+        maskCtx.fillRect(0, 0, width, height);
 
         // Composite product image into mask via destination-in
         maskCtx.globalCompositeOperation = "source-in";
@@ -452,19 +412,6 @@ export const SmokeRevealCanvas: React.FC<SmokeRevealCanvasProps> = ({
           alt={altText}
           className="w-4/5 h-4/5 object-contain opacity-0 animate-pulse"
         />
-      )}
-
-      {/* Ethereal Gas Burst Wave Overlay on slide transition */}
-      {revealProgress < 0.85 && (
-        <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
-          <div
-            className="w-48 h-48 rounded-full border border-gold-400/40 animate-ping"
-            style={{
-              animationDuration: "1.2s",
-              background: `radial-gradient(circle, ${theme.primaryGlow}0.25) 0%, transparent 70%)`,
-            }}
-          />
-        </div>
       )}
     </div>
   );
