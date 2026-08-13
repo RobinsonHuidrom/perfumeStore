@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, Award, ShieldCheck, Droplets, Flame, RotateCcw } from "lucide-react";
+import { Sparkles, Award } from "lucide-react";
 import { SmokeRevealCanvas, PerfumeSmokeTheme } from "./SmokeRevealCanvas";
 
 export interface FeaturedPerfume {
@@ -72,7 +72,7 @@ export const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealTriggerKey, setRevealTriggerKey] = useState(0);
 
-  // Relaxed 4-second pace for luxury presentation with fluid smoke reveal
+  // Relaxed 4.5-second pace for luxury presentation with fluid smoke reveal
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => {
@@ -87,12 +87,6 @@ export const Hero = () => {
 
   const handleSelectPerfume = (idx: number) => {
     setCurrentIndex(idx);
-    setRevealTriggerKey(Date.now());
-  };
-
-  const handleReplaySmoke = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
     setRevealTriggerKey(Date.now());
   };
 
@@ -167,14 +161,14 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column: Dynamic Smoke/Gas Reveal Product Showcase (5 cols) */}
+          {/* Right Column: Clean & Uncluttered Smoke Reveal Product Showcase (5 cols) */}
           <div className="lg:col-span-5 relative flex flex-col items-center justify-center">
             
-            {/* Glowing Orbit Backdrop Ring (Static glow) */}
+            {/* Glowing Orbit Backdrop Ring */}
             <div className="absolute w-[340px] h-[340px] sm:w-[440px] sm:h-[440px] rounded-full border border-gold-500/20 pointer-events-none"></div>
             <div className="absolute w-[290px] h-[290px] sm:w-[380px] sm:h-[380px] rounded-full border border-gold-500/10 pointer-events-none"></div>
 
-            {/* Main Showcase Container (Fixed position, focused on smoke reveal) */}
+            {/* Main Fixed Showcase Container */}
             <div className="relative z-10 w-full max-w-md">
               
               <Link
@@ -184,23 +178,16 @@ export const Hero = () => {
                 {/* Gold Ray Light Accent */}
                 <div className="absolute top-0 right-0 w-44 h-44 bg-gold-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                {/* Top Badge Overlay & Replay Vapor Button */}
-                <div className="flex items-center justify-between mb-2 z-20 relative">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-mono text-gold-400 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/20">
+                {/* Top Badge Overlay */}
+                <div className="flex items-center justify-between mb-4 z-20 relative">
+                  <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-mono text-gold-400 bg-gold-500/10 px-3.5 py-1 rounded-full border border-gold-500/20">
                     <Award size={12} />
                     <span>{activePerfume.subtitle}</span>
                   </span>
-                  
-                  {/* Replay Smoke Vapor Burst button */}
-                  <button
-                    onClick={handleReplaySmoke}
-                    title="Replay Smoke Reveal Burst"
-                    className="flex items-center gap-1 text-[10px] font-mono text-gold-400 hover:text-white bg-obsidian-800/80 hover:bg-gold-500/20 px-2.5 py-1 rounded-full border border-gold-500/30 backdrop-blur-md transition-all duration-300 group/btn"
-                  >
-                    <Flame size={12} className="text-gold-400 group-hover/btn:animate-bounce" />
-                    <span className="hidden sm:inline">Vapor Burst</span>
-                    <RotateCcw size={10} className="ml-0.5 opacity-70 group-hover/btn:rotate-180 transition-transform duration-500" />
-                  </button>
+
+                  <span className="text-[10px] font-mono text-gold-500/80 tracking-widest uppercase">
+                    {activePerfume.edition}
+                  </span>
                 </div>
 
                 {/* SMOKE / GAS REVEAL CANVAS CONTAINER */}
@@ -213,11 +200,6 @@ export const Hero = () => {
                     theme={activePerfume.smokeTheme}
                     className="w-full h-full"
                   />
-
-                  {/* Interactive Vapor Hint */}
-                  <div className="absolute bottom-2 right-2 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity text-[9px] font-mono uppercase tracking-widest text-gold-400/80 bg-obsidian-900/80 px-2 py-0.5 rounded border border-gold-500/20">
-                    Move cursor to swirl vapor
-                  </div>
                 </div>
 
                 {/* Scent Profile Overlay Badge */}
@@ -233,45 +215,33 @@ export const Hero = () => {
                   </p>
                 </div>
               </Link>
-
-              {/* Floating Badge 1: Botanical Extract */}
-              <div className="absolute -bottom-4 -left-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex z-30">
-                <Droplets size={16} className="text-gold-400" />
-                <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono">Extraction</span>
-                  <span className="font-serif text-white font-medium">{activePerfume.badge}</span>
-                </div>
-              </div>
-
-              {/* Floating Badge 2: Smoke Reveal Tech */}
-              <div className="absolute -top-4 -right-4 glass-panel px-4 py-2.5 rounded-2xl border border-gold-500/30 flex items-center space-x-2 text-xs shadow-xl hidden sm:flex z-30">
-                <ShieldCheck size={16} className="text-gold-400" />
-                <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-gray-400 font-mono">Vapor Masking</span>
-                  <span className="font-serif text-white font-medium">Gas Reveal Engine</span>
-                </div>
-              </div>
             </div>
 
-            {/* Carousel Control Dots & Scent Indicators */}
-            <div className="mt-8 flex items-center space-x-3 z-20">
-              {HERO_FEATURED_PERFUMES.map((perfume, idx) => (
-                <button
-                  key={perfume.handle}
-                  onClick={() => handleSelectPerfume(idx)}
-                  className={`group flex items-center space-x-2 px-3.5 py-1.5 rounded-full border transition-all duration-500 ${
-                    currentIndex === idx
-                      ? "bg-gold-500/20 border-gold-500 text-gold-400 shadow-md"
-                      : "bg-obsidian-800/60 border-gold-500/10 text-gray-500 hover:text-gray-300 hover:border-gold-500/30"
-                  }`}
-                >
-                  <span className="text-[10px] font-mono font-bold">0{idx + 1}</span>
-                  <span className="text-xs font-serif hidden sm:inline">{perfume.title}</span>
-                  {currentIndex === idx && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-ping" />
-                  )}
-                </button>
-              ))}
+            {/* Sleek Minimalist Luxury Bar Line Slider Indicator */}
+            <div className="mt-6 w-full max-w-md flex flex-col items-center gap-2 z-20 px-2">
+              <div className="w-full flex items-center gap-2.5">
+                {HERO_FEATURED_PERFUMES.map((perfume, idx) => (
+                  <button
+                    key={perfume.handle}
+                    onClick={() => handleSelectPerfume(idx)}
+                    className="group relative flex-1 h-1.5 rounded-full overflow-hidden bg-obsidian-800/80 border border-gold-500/10 hover:border-gold-500/40 transition-colors py-1 cursor-pointer"
+                    title={perfume.title}
+                  >
+                    {/* Animated Gold Progress Fill Bar for Active Slide */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r from-gold-600 via-gold-400 to-gold-300 rounded-full transition-all duration-500 ${
+                        currentIndex === idx ? "w-full opacity-100 shadow-[0_0_10px_rgba(212,175,55,0.7)]" : "w-0 opacity-0"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <div className="w-full flex items-center justify-between text-[11px] font-mono text-gold-400/70 tracking-widest px-0.5">
+                <span>0{currentIndex + 1} / 0{HERO_FEATURED_PERFUMES.length}</span>
+                <span className="uppercase text-[10px] tracking-widest text-gray-400 font-serif">
+                  {activePerfume.title}
+                </span>
+              </div>
             </div>
 
           </div>
@@ -280,4 +250,5 @@ export const Hero = () => {
     </section>
   );
 };
+
 
