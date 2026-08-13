@@ -1,0 +1,82 @@
+diff --git a/src/routes/price-lists/price-list-prices-add/components/price-list-prices-add-form/price-list-prices-add-prices-form.tsx b/src/routes/price-lists/price-list-prices-add/components/price-list-prices-add-form/price-list-prices-add-prices-form.tsx
+index 1234567..abcdefg 100644
+--- a/src/routes/price-lists/price-list-prices-add/components/price-list-prices-add-form/price-list-prices-add-prices-form.tsx
++++ b/src/routes/price-lists/price-list-prices-add/components/price-list-prices-add-form/price-list-prices-add-prices-form.tsx
+@@ -1,5 +1,5 @@
+ import { HttpTypes } from "@medusajs/types"
+-import { useEffect } from "react"
++import { useEffect, useRef, useState } from "react"
+ import { UseFormReturn, useWatch } from "react-hook-form"
+ 
+ import { DataGrid } from "../../../../../components/data-grid"
+@@ -45,8 +45,16 @@ export const PriceListPricesAddPricesForm = ({
+ 
+   const { setCloseOnEscape } = useRouteModal()
+ 
++  /**
++   * Track which products have already had their base prices pre-filled
++   * to avoid overwriting user edits on re-renders.
++   */
++  const priceFilledRef = useRef<Set<string>>(new Set())
++
+   useEffect(() => {
+     if (!isLoading && products) {
++      const newProducts: HttpTypes.AdminProduct[] = []
++
+       products.forEach((product) => {
+         /**
+          * If the product already exists in the form, we don't want to overwrite it.
+@@ -63,7 +71,53 @@ export const PriceListPricesAddPricesForm = ({
+             return variants
+           }, {} as PriceListCreateProductVariantsSchema),
+         })
++
++        newProducts.push(product)
+       })
++
++      /**
++       * PATCH: Fetch base prices from catalog and pre-fill the
++       * "Original Base Price" region column for newly added products.
++       */
++      if (newProducts.length > 0) {
++        const allVariantIds = newProducts.flatMap(
++          (p) => p.variants?.map((v) => v.id) || []
++        )
++
++        // Filter out variants that have already been price-filled
++        const unfilled = allVariantIds.filter(
++          (vid) => !priceFilledRef.current.has(vid)
++        )
++
++        if (unfilled.length > 0) {
++          fetch(
++            `/admin/variant-base-prices?variant_ids=${unfilled.join(",")}`,
++            { credentials: "include" }
++          )
++            .then((res) => res.json())
++            .then((data) => {
++              if (data.success && data.prices && data.region_id) {
++                const regionId = data.region_id as string
++
++                newProducts.forEach((product) => {
++                  product.variants?.forEach((variant) => {
++                    const basePrice = data.prices[variant.id]
++                    if (basePrice && !priceFilledRef.current.has(variant.id)) {
++                      setValue(
++                        `products.${product.id}.variants.${variant.id}.region_prices.${regionId}`,
++                        [{ amount: basePrice.amount.toString() }]
++                      )
++                      priceFilledRef.current.add(variant.id)
++                    }
++                  })
++                })
++              }
++            })
++            .catch((err) => {
++              console.warn("Failed to fetch base prices:", err)
++            })
++        }
++      }
+     }
+   }, [products, existingProducts, isLoading, setValue])
+ 
